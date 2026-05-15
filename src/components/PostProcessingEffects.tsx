@@ -22,7 +22,11 @@ export function PostProcessingEffects() {
       ) : (
         <></>
       )}
-      <ChromaticAberration offset={new Vector2(0.002, 0.002)} />
+      <ChromaticAberration
+        offset={new Vector2(0.002, 0.002)}
+        radialModulation={false}
+        modulationOffset={0.15}
+      />
       <Vignette darkness={0.5} offset={0.3} />
     </EffectComposer>
   );
