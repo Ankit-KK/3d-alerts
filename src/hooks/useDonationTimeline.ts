@@ -17,7 +17,8 @@ function playSound(key: keyof typeof sounds) {
 }
 
 interface TimelineTargets {
-  panelRef: React.RefObject<THREE.Mesh>;
+  coreRef: React.RefObject<THREE.Mesh>;
+  ringRef: React.RefObject<THREE.Mesh>;
   nameRef: React.RefObject<THREE.Group>;
   amountRef: React.RefObject<THREE.Group>;
   messageRef: React.RefObject<THREE.Mesh>;
@@ -39,54 +40,61 @@ export function useDonationTimeline(targets: TimelineTargets) {
     });
     tlRef.current = tl;
 
-    const panel = targets.panelRef.current;
+    const core = targets.coreRef.current;
+    const ring = targets.ringRef.current;
     const nameGroup = targets.nameRef.current;
     const amountGroup = targets.amountRef.current;
 
-    // Safe material extraction
-    const mat = panel && !Array.isArray(panel.material) ? panel.material : null;
-
-    // Initial states – only call GSAP if the target is non-null
-    if (mat) {
-      mat.opacity = 0;
-      mat.transparent = true;
-      mat.needsUpdate = true;
+    // Set initial states
+    if (core) {
+      core.scale.set(0, 0, 0);
     }
-
-    if (panel) {
-      tl.set(panel.scale, { x: 0.8, y: 0.8, z: 0.8 });
+    if (ring) {
+      ring.scale.set(0, 0, 0);
     }
     if (nameGroup) {
-      tl.set(nameGroup.scale, { x: 0, y: 0, z: 0 });
+      nameGroup.scale.set(0, 0, 0);
     }
     if (amountGroup) {
-      tl.set(amountGroup.scale, { x: 0, y: 0, z: 0 });
+      amountGroup.scale.set(0, 0, 0);
     }
 
     // Audio intro
     tl.call(() => playSound('intro'), undefined, 0);
 
-    // Panel fade-in + expand
-    if (mat && panel) {
-      tl.to(mat, { opacity: 0.8, duration: 0.4, onUpdate: () => (mat.needsUpdate = true) }, 0);
-      tl.to(panel.scale, { x: 1, y: 1, z: 1, duration: 0.6, ease: 'power2.out' }, 0);
+    // Core appears
+    if (core) {
+      tl.to(core.scale, { x: 1, y: 1, z: 1, duration: 0.7, ease: 'back.out(1.7)' }, 0.1);
     }
 
     // Camera push-in
-    tl.to(camera.position, { z: 3.5, duration: 1.2, ease: 'power3.inOut' }, 0.2);
+    tl.to(camera.position, { z: 3.2, duration: 1.2, ease: 'power3.inOut' }, 0.2);
 
-    // Name text
+    // Name text reveal
     if (nameGroup) {
       tl.to(nameGroup.scale, { x: 1, y: 1, z: 1, duration: 0.7, ease: 'elastic.out(1, 0.5)' }, '-=0.6');
     }
 
     // Amount slam
     if (amountGroup) {
-      tl.fromTo(amountGroup.scale, { x: 0, y: 0, z: 0 }, { x: 1.3, y: 1.3, z: 1.3, duration: 0.5, ease: 'back.out(2.5)' }, '-=0.3');
+      tl.fromTo(amountGroup.scale, { x: 0, y: 0, z: 0 }, { x: 1.4, y: 1.4, z: 1.4, duration: 0.5, ease: 'back.out(2.5)' }, '-=0.3');
       tl.to(amountGroup.scale, { x: 1, y: 1, z: 1, duration: 0.3, ease: 'power2.out' }, '-=0.1');
     }
 
-    // Impact sound + shake
+    // Shockwave ring expansion
+    if (ring) {
+      tl.to(ring.scale, { x: 1.6, y: 1.6, z: 1.6, duration: 0.8, ease: 'power2.out', onStart: () => {
+        if (ring.material && !Array.isArray(ring.material)) {
+          (ring.material as THREE.ShaderMaterial).uniforms.uOpacity.value = 1;
+        }
+      }, onComplete: () => {
+        if (ring.material && !Array.isArray(ring.material)) {
+          (ring.material as THREE.ShaderMaterial).uniforms.uOpacity.value = 0;
+        }
+      }}, '-=0.4');
+    }
+
+    // Impact sound + camera shake
     tl.call(() => playSound('impact'), undefined, '+=0.1');
     const shake = { x: 0, y: 0, z: 0 };
     tl.to(shake, {
@@ -113,10 +121,7 @@ export function useDonationTimeline(targets: TimelineTargets) {
         },
       });
       outroTl.to(camera.position, { z: 6, duration: 1.5, ease: 'power3.in' }, 0);
-      if (mat && panel) {
-        outroTl.to(mat, { opacity: 0, duration: 0.6, onUpdate: () => (mat.needsUpdate = true) }, 0);
-        outroTl.to(panel.scale, { x: 0.9, y: 0.9, z: 0.9, duration: 0.8 }, 0);
-      }
+      if (core) outroTl.to(core.scale, { x: 0, y: 0, z: 0, duration: 0.5, ease: 'back.in(2)' }, 0);
       [nameGroup, amountGroup, targets.messageRef.current].forEach(ref => {
         if (ref) {
           outroTl.to(ref.scale, { x: 0, y: 0, z: 0, duration: 0.4, ease: 'power2.in' }, 0.2);
