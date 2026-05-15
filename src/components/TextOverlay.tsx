@@ -29,7 +29,6 @@ const TextOverlay = forwardRef<any, TextOverlayProps>(
           position={[0, 0.8, 0]}
           outlineWidth={0.02}
           outlineColor="#000000"
-          font="https://raw.githubusercontent.com/pmndrs/drei/main/examples/public/fonts/Inter-Bold.woff"
         >
           {donorName}
         </Text>
@@ -42,7 +41,6 @@ const TextOverlay = forwardRef<any, TextOverlayProps>(
           position={[0, 0.1, 0]}
           outlineWidth={0.04}
           outlineColor="#000000"
-          font="https://raw.githubusercontent.com/pmndrs/drei/main/examples/public/fonts/Inter-Bold.woff"
         >
           {currency}{amount}
         </Text>
@@ -54,7 +52,6 @@ const TextOverlay = forwardRef<any, TextOverlayProps>(
             anchorX="center"
             anchorY="middle"
             position={[0, -0.4, 0]}
-            font="https://raw.githubusercontent.com/pmndrs/drei/main/examples/public/fonts/Inter-Regular.woff"
           >
             {message}
           </Text>
