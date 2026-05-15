@@ -1,23 +1,22 @@
 'use client';
 
 import { useRef, Suspense } from 'react';
-import { HolographicRing, HolographicRingHandle } from './HolographicRing';
-import { PhysicsShards } from './PhysicsShards';
-import { TextOverlay } from './TextOverlay';
+import { EmberRing, EmberRingHandle } from './EmberRing';
+import { EmberShards } from './EmberShards';
+import { EmberText } from './EmberText';
+import { SparkField } from './SparkField';
 import { useDonationTimeline } from '@/hooks/useDonationTimeline';
 import { useDonationStore } from '@/store/useDonationStore';
 import * as THREE from 'three';
 
 export function DonationAlertScene() {
-  const ringRef = useRef<HolographicRingHandle>(null);
+  const ringRef = useRef<EmberRingHandle>(null);
   const nameRef = useRef<THREE.Mesh>(null);
   const amountRef = useRef<THREE.Mesh>(null);
   const messageRef = useRef<THREE.Mesh>(null);
   const activeAlert = useDonationStore((s) => s.activeAlert);
 
-  const explodePhysics = () => {
-    // PhysicsShards auto-explodes on mount via key
-  };
+  const explodePhysics = () => {};
 
   useDonationTimeline({
     ringRef,
@@ -29,17 +28,19 @@ export function DonationAlertScene() {
 
   return (
     <>
-      <ambientLight intensity={0.4} />
-      <pointLight position={[2, 1, 2]} intensity={1.5} color="#ff5500" />
-      <HolographicRing ref={ringRef} />
+      <ambientLight intensity={0.5} />
+      <pointLight position={[2, 1, 2]} intensity={2} color="#ff5500" />
+      <pointLight position={[-2, 0.5, -1]} intensity={1.5} color="#ff8800" />
+      <EmberRing ref={ringRef} />
+      <SparkField />
       <Suspense fallback={null}>
-        <TextOverlay
+        <EmberText
           nameRef={nameRef}
           amountRef={amountRef}
           messageRef={messageRef}
         />
       </Suspense>
-      {activeAlert && <PhysicsShards key={activeAlert.id} />}
+      {activeAlert && <EmberShards key={activeAlert.id} />}
     </>
   );
 }
