@@ -4,16 +4,17 @@ import { useRef, useMemo, useEffect } from 'react';
 import { RigidBody, CuboidCollider } from '@react-three/rapier';
 import * as THREE from 'three';
 
-const FRAGMENT_COUNT = 14;
+const COUNT = 16;
 
 export function EnergyFragments() {
   const apis = useRef<any[]>([]);
 
-  const fragments = useMemo(
+  const frags = useMemo(
     () =>
-      Array.from({ length: FRAGMENT_COUNT }).map((_, i) => ({
+      Array.from({ length: COUNT }).map((_, i) => ({
         id: i,
-        color: new THREE.Color().setHSL(0.55 + Math.random() * 0.2, 1, 0.5),
+        color: new THREE.Color().setHSL(0.55 + Math.random() * 0.15, 0.9, 0.6),
+        scale: 0.08 + Math.random() * 0.1,
       })),
     []
   );
@@ -22,13 +23,13 @@ export function EnergyFragments() {
     const timer = setTimeout(() => {
       apis.current.forEach((api, i) => {
         if (!api) return;
-        // Directional explosion: mostly outward and upward
-        const angle = (i / FRAGMENT_COUNT) * Math.PI * 2;
+        const angle = (i / COUNT) * Math.PI * 2;
+        const speed = 2.5 + Math.random() * 2;
         api.applyImpulse(
           {
-            x: Math.cos(angle) * 2.2,
-            y: 3 + Math.random() * 2,
-            z: Math.sin(angle) * 2.2 + (Math.random() - 0.5) * 1.5,
+            x: Math.cos(angle) * speed,
+            y: 4 + Math.random() * 3,
+            z: Math.sin(angle) * speed + (Math.random() - 0.5) * 2,
           },
           true
         );
@@ -40,27 +41,27 @@ export function EnergyFragments() {
 
   return (
     <>
-      <RigidBody type="fixed" position={[0, -1.8, 0]}>
-        <CuboidCollider args={[2.5, 0.1, 2.5]} />
+      <RigidBody type="fixed" position={[0, -1.5, 0]}>
+        <CuboidCollider args={[3, 0.1, 3]} />
       </RigidBody>
-      {fragments.map((f, i) => (
+      {frags.map((f, i) => (
         <RigidBody
-          key={`frag-${i}`}
+          key={i}
           colliders="cuboid"
-          mass={0.1}
-          position={[0, 0, 0]}
-          linearDamping={0.25}
-          angularDamping={0.3}
+          mass={0.08}
+          position={[0, 0.15, 0]}
+          linearDamping={0.3}
+          angularDamping={0.4}
           ref={(api) => { apis.current[i] = api; }}
         >
-          <mesh>
-            <boxGeometry args={[0.12, 0.12, 0.12]} />
+          <mesh scale={[f.scale, f.scale, f.scale]}>
+            <boxGeometry />
             <meshStandardMaterial
               color={f.color}
               emissive={f.color}
-              emissiveIntensity={1.8}
+              emissiveIntensity={1.5}
               roughness={0.1}
-              metalness={0.8}
+              metalness={0.7}
             />
           </mesh>
         </RigidBody>
