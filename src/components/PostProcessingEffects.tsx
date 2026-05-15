@@ -3,6 +3,7 @@
 import { EffectComposer, Bloom, ChromaticAberration, Vignette } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 import { useSearchParams } from 'next/navigation';
+import { Vector2 } from 'three';
 
 export function PostProcessingEffects() {
   const searchParams = useSearchParams();
@@ -21,7 +22,7 @@ export function PostProcessingEffects() {
       ) : (
         <></>
       )}
-      <ChromaticAberration offset={[0.002, 0.002]} />
+      <ChromaticAberration offset={new Vector2(0.002, 0.002)} />
       <Vignette darkness={0.5} offset={0.3} />
     </EffectComposer>
   );
