@@ -43,23 +43,30 @@ export function useDonationTimeline(targets: TimelineTargets) {
     const nameGroup = targets.nameRef.current;
     const amountGroup = targets.amountRef.current;
 
-    // Safely extract material from panel
+    // Safe material extraction
     const mat = panel && !Array.isArray(panel.material) ? panel.material : null;
 
-    // Set initial states
+    // Initial states – only call GSAP if the target is non-null
     if (mat) {
       mat.opacity = 0;
       mat.transparent = true;
       mat.needsUpdate = true;
     }
-    tl.set(panel?.scale, { x: 0.8, y: 0.8, z: 0.8 });
-    tl.set(nameGroup?.scale, { x: 0, y: 0, z: 0 });
-    tl.set(amountGroup?.scale, { x: 0, y: 0, z: 0 });
+
+    if (panel) {
+      tl.set(panel.scale, { x: 0.8, y: 0.8, z: 0.8 });
+    }
+    if (nameGroup) {
+      tl.set(nameGroup.scale, { x: 0, y: 0, z: 0 });
+    }
+    if (amountGroup) {
+      tl.set(amountGroup.scale, { x: 0, y: 0, z: 0 });
+    }
 
     // Audio intro
     tl.call(() => playSound('intro'), undefined, 0);
 
-    // Panel fades in and expands
+    // Panel fade-in + expand
     if (mat && panel) {
       tl.to(mat, { opacity: 0.8, duration: 0.4, onUpdate: () => (mat.needsUpdate = true) }, 0);
       tl.to(panel.scale, { x: 1, y: 1, z: 1, duration: 0.6, ease: 'power2.out' }, 0);
@@ -68,7 +75,7 @@ export function useDonationTimeline(targets: TimelineTargets) {
     // Camera push-in
     tl.to(camera.position, { z: 3.5, duration: 1.2, ease: 'power3.inOut' }, 0.2);
 
-    // Name text scale
+    // Name text
     if (nameGroup) {
       tl.to(nameGroup.scale, { x: 1, y: 1, z: 1, duration: 0.7, ease: 'elastic.out(1, 0.5)' }, '-=0.6');
     }
@@ -79,7 +86,7 @@ export function useDonationTimeline(targets: TimelineTargets) {
       tl.to(amountGroup.scale, { x: 1, y: 1, z: 1, duration: 0.3, ease: 'power2.out' }, '-=0.1');
     }
 
-    // Impact sound and camera shake
+    // Impact sound + shake
     tl.call(() => playSound('impact'), undefined, '+=0.1');
     const shake = { x: 0, y: 0, z: 0 };
     tl.to(shake, {
